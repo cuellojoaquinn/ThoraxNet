@@ -30,7 +30,7 @@ class FourierAmplitudeMixup:
         ds      = self._rng.choice(self.datasets)
         idx     = self._rng.randint(0, len(ds) - 1)
         row     = ds.df.iloc[idx]
-        src_img = ds._load_image(row)          # siempre PIL, sin transform
+        src_img = ds._load_image_raw(row)          # siempre PIL, sin transform
         src_img = src_img.resize(img.size, Image.BILINEAR)
 
         img_np = np.array(img).astype(np.float32)
