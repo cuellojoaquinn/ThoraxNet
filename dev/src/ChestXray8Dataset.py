@@ -63,6 +63,11 @@ class ChestXray8Dataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image
+    
+    def _load_image_raw(self, row: pd.Series) -> Image.Image:
+        # ChestXray8
+        img_path = self._path_map.get(row["Image Index"])
+        return Image.open(img_path).convert("RGB")
 
     def _extract_labels(self, row: pd.Series) -> dict:
         findings = set(row["Finding Labels"].split("|"))

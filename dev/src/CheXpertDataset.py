@@ -61,6 +61,10 @@ class CheXpertDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image
+    
+    def _load_image_raw(self, row: pd.Series) -> Image.Image:
+        # CheXpert
+        return Image.open(os.path.join(self.root, row["Path"])).convert("RGB")
 
     def _extract_labels(self, row: pd.Series) -> dict:
         labels = {}
