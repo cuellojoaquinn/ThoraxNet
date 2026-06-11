@@ -1,1 +1,1 @@
-from .densenet import get_dannynet
+from .dannynet import get_dannynet
