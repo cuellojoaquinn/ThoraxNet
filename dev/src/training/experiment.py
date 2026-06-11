@@ -1,6 +1,6 @@
 # src/training/experiment.py
 
-from src.models.densenet  import get_dannynet
+from src.models.dannynet  import get_dannynet
 from src.training.losses  import chexnet_loss, focal_loss
 from src.training.train   import train_fine_tuning
 
