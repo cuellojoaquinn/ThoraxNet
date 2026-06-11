@@ -1,6 +1,10 @@
-# datasets/__init__.py
-from .CheXpertDataset  import CheXpertDataset
-from .ChestXray8Dataset    import ChestXray8Dataset
-from .VinBigDataset    import VinBigDataset
-from .UnifiedDataset   import UnifiedDataset, CANONICAL_LABELS
-from .acquisition import ProjectionStrategy, ViewStrategy
+# src/__init__.py
+
+from .datasets.CheXpertDataset  import CheXpertDataset
+from .datasets.ChestXray8Dataset import ChestXray8Dataset
+from .datasets.VinBigDataset    import VinBigDataset
+from .datasets.UnifiedDataset   import UnifiedDataset, CANONICAL_LABELS
+from .datasets.acquisition      import ProjectionStrategy, ViewStrategy
+
+from .models     import get_dannynet
+from .training   import chexnet_loss, focal_loss, train_fine_tuning, run_experiments, EXPERIMENTS
