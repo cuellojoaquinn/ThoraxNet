@@ -15,6 +15,10 @@ CHEXPERT_LABELS = [
     "Pleural Other", "Fracture"
 ]
 
+# Estrategia de etiquetas inciertas por clase, basada en CheXpert (Irvin et al., 2019).
+# U-Ones: inciertas tratadas como positivas — mejor para Atelectasis, Cardiomegaly, Edema.
+# U-Ignore: inciertas tratadas como -1 — se enmascaran en la loss para el resto.
+U_ONES_LABELS = {"Atelectasis", "Cardiomegaly", "Edema"}
 
 class CheXpertDataset(Dataset):
 
@@ -70,5 +74,10 @@ class CheXpertDataset(Dataset):
         labels = {}
         for label in CHEXPERT_LABELS:
             value = row[label]
-            labels[label] = 0 if pd.isna(value) else int(value)
+            if pd.isna(value):
+                labels[label] = 0
+            elif int(value) == -1:
+                labels[label] = 1 if label in U_ONES_LABELS else -1
+            else:
+                labels[label] = int(value)
         return labels

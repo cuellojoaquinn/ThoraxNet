@@ -1,19 +1,26 @@
 # src/training/train.py
 
+import os
 import torch
-import torch.nn as nn
 
 
 def train_one_epoch(model, loader, optimizer, loss_fn, device):
     model.train()
     L = 0.0
     for i, (X, y) in enumerate(loader):
-        X, y = X.to(device), y.float().to(device)
+        X, y = X.to(device), y.to(device)
         optimizer.zero_grad()
-        l = loss_fn(model(X), y)
-        l.backward()
+
+        # Máscara U-Ignore: excluye etiquetas inciertas (-1) del cálculo de la loss.
+        # y.clamp(min=0) convierte -1 a 0 antes de BCEWithLogitsLoss,
+        # pero mask anula esa contribución — gradiente de esos ejemplos es 0.
+        mask = (y != -1).float()
+        out  = model(X)
+        loss = (loss_fn(out, y.clamp(min=0)) * mask).mean()
+
+        loss.backward()
         optimizer.step()
-        L += l.item()
+        L += loss.item()
         if (i + 1) % 10 == 0:
             print(f'batch {i+1}/{len(loader)} | loss {L/(i+1):.4f}')
     return L / len(loader)
@@ -24,8 +31,11 @@ def evaluate(model, loader, loss_fn, device):
     L = 0.0
     with torch.no_grad():
         for X, y in loader:
-            X, y = X.to(device), y.float().to(device)
-            L += loss_fn(model(X), y).item()
+            X, y = X.to(device), y.to(device)
+            mask = (y != -1).float()
+            out  = model(X)
+            loss = (loss_fn(out, y.clamp(min=0)) * mask).mean()
+            L += loss.item()
     return L / len(loader)
 
 
@@ -74,8 +84,6 @@ def train_fine_tuning(model, train_loader, val_loader, learning_rate,
         history['val_loss'].append(val_loss)
         print(f'epoch {epoch+1} | train_loss {train_loss:.4f} | val_loss {val_loss:.4f}')
 
-    # Guardar modelo final
-    import os
     os.makedirs(output_dir, exist_ok=True)
     checkpoint_path = os.path.join(output_dir, f"{experiment_name}.pth")
     torch.save(model.state_dict(), checkpoint_path)
