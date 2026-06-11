@@ -11,9 +11,6 @@ def train_one_epoch(model, loader, optimizer, loss_fn, device):
         X, y = X.to(device), y.to(device)
         optimizer.zero_grad()
 
-        # Máscara U-Ignore: excluye etiquetas inciertas (-1) del cálculo de la loss.
-        # y.clamp(min=0) convierte -1 a 0 antes de BCEWithLogitsLoss,
-        # pero mask anula esa contribución — gradiente de esos ejemplos es 0.
         mask = (y != -1).float()
         out  = model(X)
         loss = (loss_fn(out, y.clamp(min=0)) * mask).mean()
@@ -59,9 +56,9 @@ def get_optimizer(model, optimizer_name, learning_rate, param_group=True):
 
 
 def train_fine_tuning(model, train_loader, val_loader, learning_rate,
-                      num_epochs=5, param_group=True, loss_fn=None,
+                      num_epochs=10, param_group=True, loss_fn=None,
                       optimizer_name='sgd', experiment_name='model',
-                      output_dir='output'):
+                      output_dir='output', patience=3):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
     model.to(device)
@@ -73,20 +70,33 @@ def train_fine_tuning(model, train_loader, val_loader, learning_rate,
     optimizer = get_optimizer(model, optimizer_name, learning_rate, param_group)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
-    history = {'train_loss': [], 'val_loss': []}
+    os.makedirs(output_dir, exist_ok=True)
+    checkpoint_path = os.path.join(output_dir, f"{experiment_name}.pth")
+
+    history         = {'train_loss': [], 'val_loss': []}
+    best_val_loss   = float('inf')
+    patience_counter = 0
 
     for epoch in range(num_epochs):
         print(f'\n--- Epoch {epoch+1}/{num_epochs} ---')
         train_loss = train_one_epoch(model, train_loader, optimizer, loss_fn, device)
         val_loss   = evaluate(model, val_loader, loss_fn, device)
         scheduler.step()
+
         history['train_loss'].append(train_loss)
         history['val_loss'].append(val_loss)
         print(f'epoch {epoch+1} | train_loss {train_loss:.4f} | val_loss {val_loss:.4f}')
 
-    os.makedirs(output_dir, exist_ok=True)
-    checkpoint_path = os.path.join(output_dir, f"{experiment_name}.pth")
-    torch.save(model.state_dict(), checkpoint_path)
-    print(f'Modelo guardado en {checkpoint_path}')
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            patience_counter = 0
+            torch.save(model.state_dict(), checkpoint_path)
+            print(f'Mejor modelo guardado — val_loss: {val_loss:.4f}')
+        else:
+            patience_counter += 1
+            print(f'Sin mejora — patience: {patience_counter}/{patience}')
+            if patience_counter >= patience:
+                print('Early stopping.')
+                break
 
     return history
