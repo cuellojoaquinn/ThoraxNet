@@ -9,7 +9,7 @@ from src import (
     CheXpertDataset, ChestXray8Dataset, VinBigDataset,
     UnifiedDataset, ProjectionStrategy, ViewStrategy
 )
-from transforms import FourierAmplitudeMixup
+from src.transforms.FourierAmplitudeMixup import FourierAmplitudeMixup
 
 
 def make_chexpert_splits(dataset_root, seed=42):
