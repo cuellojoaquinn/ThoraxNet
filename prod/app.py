@@ -148,7 +148,7 @@ st.title("Lectura asistida")
 st.markdown("""
 1. Cargá un ejemplo de abajo o subí tu propia radiografía
 2. Hacé clic en **Analizar imagen**
-3. Revisá las predicciones orientativas en el panel derecho
+3. Revisá las predicciones orientativas
 """)
 
 examples_section()
