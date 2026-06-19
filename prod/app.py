@@ -1,7 +1,8 @@
 import io
 import streamlit as st
+import streamlit.components.v1 as components
 from PIL import Image
-from utils import CANONICAL_LABELS, LABEL_ES, load_model, predict, img_to_b64
+from utils import CANONICAL_LABELS, LABEL_ES, LABEL_CSV_ES, EXAMPLE_LABELS, load_model, predict, img_to_b64, get_example_images
 
 # ── Estilos ───────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,8 @@ st.markdown("""
 
 if "img_bytes" not in st.session_state:
     st.session_state.img_bytes = None
+if "scroll_to_upload" not in st.session_state:
+    st.session_state.scroll_to_upload = False
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
@@ -79,10 +82,92 @@ with st.sidebar:
     st.caption("Modelo · DenseNet-121")
     st.caption("Entrada 224×224 · 8 salidas")
 
+# ── Ejemplos de prueba ────────────────────────────────────────────────────────
+
+@st.fragment
+def examples_section():
+    with st.expander("Ejemplos de prueba por patología", expanded=True):
+        selected = st.radio(
+            "Patología",
+            list(EXAMPLE_LABELS.keys()),
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+        examples = get_example_images(selected)
+
+        if examples:
+            cols = st.columns(len(examples))
+            for col, (img_path, label) in zip(cols, examples):
+                with col:
+                    st.caption(img_path.name)
+                    b64 = img_to_b64(Image.open(img_path))
+                    st.markdown(
+                        f'<div style="height:220px;display:flex;align-items:center;'
+                        f'justify-content:center;margin-bottom:0.5rem;">'
+                        f'<img src="data:image/png;base64,{b64}" '
+                        f'style="max-height:220px;max-width:100%;object-fit:contain;border-radius:6px;"/>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                    if st.button("Cargar", key=str(img_path), use_container_width=True):
+                        with open(img_path, "rb") as f:
+                            st.session_state.img_bytes = f.read()
+                        st.session_state.scroll_to_upload = True
+                        st.rerun(scope="app")
+
+            st.markdown("**Patologías presentes en cada imagen**")
+            img_pats: dict[str, list[str]] = {}
+            all_pats: list[str] = []
+            for i, (_, label) in enumerate(examples, 1):
+                pats = (
+                    [p.strip() for p in label.replace(", ", " | ").split(" | ")]
+                    if label else []
+                )
+                img_pats[f"Img {i}"] = pats
+                for p in pats:
+                    if p not in all_pats:
+                        all_pats.append(p)
+
+            if all_pats:
+                img_keys = list(img_pats.keys())
+                header    = "| Patología | " + " | ".join(img_keys) + " |"
+                separator = "|:---|" + ":---:|" * len(img_keys)
+                rows_md   = [header, separator]
+                for pat in all_pats:
+                    cells = " | ".join("✓" if pat in img_pats[k] else "" for k in img_keys)
+                    rows_md.append(f"| {LABEL_CSV_ES.get(pat, pat)} | {cells} |")
+                st.markdown("\n".join(rows_md))
+            else:
+                st.caption("Sin etiquetas CSV disponibles para estas imágenes.")
+        else:
+            st.caption("Sin imágenes disponibles para esta patología.")
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 st.title("Lectura asistida")
-st.caption("Subí una radiografía de tórax para obtener predicciones orientativas")
+st.markdown("""
+1. Cargá un ejemplo de abajo o subí tu propia radiografía
+2. Hacé clic en **Analizar imagen**
+3. Revisá las predicciones orientativas en el panel derecho
+""")
+
+examples_section()
+
+st.divider()
+
+st.markdown('<div id="seccion-radiografia"></div>', unsafe_allow_html=True)
+
+if st.session_state.scroll_to_upload:
+    st.session_state.scroll_to_upload = False
+    components.html(
+        """<script>
+        setTimeout(function() {
+            var el = window.parent.document.getElementById('seccion-radiografia');
+            if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }, 200);
+        </script>""",
+        height=0,
+    )
 
 col_upload, col_pred = st.columns([1, 1], gap="large")
 

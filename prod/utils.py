@@ -25,6 +25,86 @@ LABEL_ES = {
     "Pneumothorax":  "Neumotórax",
 }
 
+LABEL_CSV_ES: dict[str, str] = {
+    "Atelectasis":        "Atelectasia",
+    "Cardiomegaly":       "Cardiomegalia",
+    "Consolidation":      "Consolidación",
+    "Edema":              "Edema pulmonar",
+    "Effusion":           "Derrame pleural",
+    "Pneumonia":          "Neumonía",
+    "Pneumothorax":       "Neumotórax",
+    "No Finding":         "Sin hallazgo",
+    "Emphysema":          "Enfisema",
+    "Mass":               "Masa pulmonar",
+    "Infiltration":       "Infiltración",
+    "Lung Opacity":       "Opacidad pulmonar",
+    "Pleural Effusion":   "Derrame pleural",
+    "Support Devices":    "Dispositivos de soporte",
+    "Lung Lesion":        "Lesión pulmonar",
+    "Pleural Other":      "Otra patología pleural",
+    "Fracture":           "Fractura",
+    "Nodule":             "Nódulo",
+    "Fibrosis":           "Fibrosis",
+    "Hernia":             "Hernia",
+    "Pleural_Thickening": "Engrosamiento pleural",
+    "Enlarged Cardiomediastinum": "Ensanchamiento mediastínico",
+}
+
+EXAMPLE_LABELS: dict[str, dict[str, str | None]] = {
+    "Atelactasia": {
+        "1.png": "Atelectasis",
+        "2.png": "Atelectasis | Cardiomegaly | Emphysema | Mass | Pneumothorax",
+        "3.jpg": "Atelectasis | Cardiomegaly | Lung Opacity | Pneumothorax | Support Devices",
+    },
+    "Cardiomegalia": {
+        "8.jpeg":  None,
+        "11.jpeg": None,
+        "3.png":   "Cardiomegaly",
+    },
+    "Consolidacion": {
+        "1.png": "Atelectasis | Consolidation | Edema | Pneumonia",
+        "2.png": "Consolidation",
+        "3.jpg": "Consolidation | Lung Opacity | Pleural Effusion | Support Devices",
+    },
+    "Derrames Pleurales": {
+        "6.jpeg": None,
+        "2.png":  "Cardiomegaly | Effusion",
+        "3.png":  "Effusion | Infiltration",
+    },
+    "Edema pulmonar": {
+        "1.png": "Cardiomegaly | Edema | Effusion",
+        "2.png": "Cardiomegaly | Edema | Effusion",
+        "3.jpg": "Edema",
+    },
+    "Neumonía": {
+        "5.jpeg":  None,
+        "7.jpeg":  None,
+        "10.jpeg": None,
+        "12.jpeg": None,
+    },
+    "Neumotorax": {
+        "1.png": "Emphysema | Pneumothorax",
+        "2.png": "Emphysema | Pneumothorax",
+        "3.jpg": "Pneumothorax",
+    },
+    "Sin hallazgo": {
+        "1.jpeg": None,
+        "2.jpeg": None,
+        "3.jpeg": None,
+        "4.jpeg": None,
+    },
+}
+
+
+def get_example_images(folder: str) -> list[tuple[Path, str | None]]:
+    data_dir = Path(__file__).parent / "data" / folder
+    result = []
+    for fname, label in EXAMPLE_LABELS.get(folder, {}).items():
+        p = data_dir / fname
+        if p.exists():
+            result.append((p, label))
+    return result
+
 _base = Path(__file__).parent
 MODEL_PATH = (
     _base / "model" / "e2_dannynet_focal_adamw.pth"

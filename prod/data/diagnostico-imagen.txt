@@ -1,0 +1,44 @@
+NRM: Normal
+LVT: Leve aumento de tramado vascular
+NEU: Neumonía / foco neumónico (F: focos, BI: basal izquierda, SD: superior derecha)
+DRR: Derrame (pleural)
+EAP: Edema agudo de pulmón
+CE: Cuerpos extraños
+CAT: Catéter implantable
+MED: Alteración mediastinal
+FXC: Fractura costal
+MGC: Megacardio / cardiomegalia
+CGT: Corazón en gota
+TPC: Taponamiento / derrame pericárdico
+ESC: Escoliosis
+
+Claramente patológicas:
+
+5 — Focos neumónicos
+6 — Derrame pleural bilateral + edema pulmonar (los cuerpos extraños y catéter no son patología, son dispositivos de internación)
+7 — Neumonía basal izquierda + desplazamiento mediastinal + fractura costal (5ta y 6ta derecha)
+8 — Megacardio
+9 — Corazón en gota con probable taponamiento/derrame pericárdico
+10 — Neumonía de base izquierda
+11 — Escoliosis marcada + megacardio
+12 — Neumonía en campo superior derecho
+
+No patológicas (normales o variantes leves):
+
+1 — Normal con leve aumento de tramado vascular (el leve aumento de tramado vascular suele considerarse variante o hallazgo inespecífico, no patología en sí)
+2 — Normal
+3 — Normal con leve aumento vascular
+4 — Normal con leve aumento de tramado y pulmón izquierdo levemente más difuso (hallazgo limítrofe, lo marcaste con ** así que quizás quieras revisarlo)
+
+1. NRM-LVT — Normal con leve aumento de tramado vascular
+2. NRM — Normal
+3. NRM-LVT — Leve aumento vascular, por lo demás normal
+4. NRM-LVT — Normal, leve aumento de tramado vascular y pulmón izquierdo (derecho del observador) levemente más difuso **
+5. NEU-F — Focos probablemente neumónicos
+6. DRR-EAP-CE-CAT — Pérdida de ángulo costodiafragmático bilateral (sugerente de derrame), imagen difusa en ambos campos pulmonares (probable edema pulmonar), cuerpos extraños (cables de internación) y catéter implantable en campo superior izquierdo
+7. NEU-BI-CE-MED-FXC — Foco neumónico basal izquierdo, múltiples cuerpos extraños por internación (tubo endotraqueal, electrodos, válvula del tubo), mediastino desplazado a la derecha (hallazgo anómalo, etiología a determinar) y probable fractura de 5ta y 6ta costilla posterior derecha
+8. MGC — Megacardio (el corazón cubre casi todo el pulmón izquierdo)
+9. CGT-TPC — Corazón en gota, probable taponamiento cardíaco o derrame pericárdico
+10. NEU-BI — Neumonía de base izquierda
+11. ESC-MGC — Marcada escoliosis con megacardio
+12. NEU-SD — Neumonía en campo pulmonar superior derecho
