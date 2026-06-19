@@ -6,10 +6,13 @@ VinBigData/train/
 VinBigData/test/
 zips/
 
-# Archivos de imagen sueltos
+# Archivos de imagen sueltos (excepto ejemplos de la app)
 *.jpg
 *.jpeg
 *.png
+!prod/data/**/*.jpg
+!prod/data/**/*.jpeg
+!prod/data/**/*.png
 *.dcm
 *.dicom
 
