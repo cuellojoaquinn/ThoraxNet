@@ -5,6 +5,16 @@ Tarea: clasificación multi-label con 11 labels canónicos.
 
 ---
 
+## Demo
+
+**URL pública:** https://huggingface.co/spaces/jqncll/ThoraxNet  
+Accesible sin login ni instalación. Desplegada en Hugging Face Spaces (Docker + Streamlit).
+
+### Modelo
+El archivo `model/e2_dannynet_focal_adamw.pth` pesa **28 MB** y está incluido directamente en el repositorio del Space. No requiere Git LFS ni descarga externa.
+
+---
+
 ## Estructura del repositorio
 
 ```
