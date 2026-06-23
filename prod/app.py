@@ -2,7 +2,7 @@ import io
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
-from utils import CANONICAL_LABELS, LABEL_ES, LABEL_CSV_ES, EXAMPLE_LABELS, load_model, predict, img_to_b64, get_example_images
+from utils import LABEL_ES, LABEL_CSV_ES, EXAMPLE_LABELS, THRESHOLDS, load_model, predict, img_to_b64, get_example_images
 
 # ── Estilos ───────────────────────────────────────────────────────────────────
 
@@ -79,8 +79,15 @@ with st.sidebar:
     st.markdown("## 🫁 Tórax IA")
     st.caption("Apoyo a la lectura · v0.4 (beta)")
     st.divider()
-    st.caption("Modelo · DenseNet-121")
-    st.caption("Entrada 224×224 · 8 salidas")
+    st.markdown("**Modelo**")
+    st.markdown("""
+<small>
+• <b>Red:</b> DenseNet-121<br>
+• <b>Optimizador:</b> AdamW<br>
+• <b>Pérdida:</b> Focal Loss<br>
+• <b>Archivo:</b> densenet_focal_moderate.pth
+</small>
+""", unsafe_allow_html=True)
 
 # ── Ejemplos de prueba ────────────────────────────────────────────────────────
 
@@ -213,21 +220,38 @@ with col_pred:
             "Confirme siempre con la lectura radiológica y el criterio clínico."
         )
 
-        st.caption("8 hallazgos · ordenados de mayor a menor probabilidad")
+        st.caption("13 hallazgos · ordenados de mayor a menor probabilidad")
 
         model = load_model()
         scores = predict(model, image)
         sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
         for label, prob in sorted_scores:
+            detected = prob >= THRESHOLDS[label]
+            opacity = "1" if detected else "0.35"
+            badge = (
+                '<span style="color:#e53935;font-weight:700;font-size:0.75rem;'
+                'background:#fde8e8;padding:1px 6px;border-radius:4px;margin-left:6px;">DETECTADO</span>'
+                if detected else ""
+            )
+            pct = int(prob * 100)
+            thr_pct = THRESHOLDS[label] * 100
+            bar_color = "#e53935" if detected else "#888"
             st.markdown(
-                f'<div class="prob-row">'
-                f'<span>{LABEL_ES[label]}</span>'
-                f'<span class="prob-val">{prob:.2f}</span>'
+                f'<div style="opacity:{opacity};margin-bottom:8px;">'
+                f'  <div class="prob-row">'
+                f'    <span>{LABEL_ES[label]}{badge}</span>'
+                f'    <span class="prob-val">{prob:.2f}</span>'
+                f'  </div>'
+                f'  <div style="position:relative;background:#e0e0e0;border-radius:4px;height:6px;margin-top:3px;">'
+                f'    <div style="width:{pct}%;background:{bar_color};height:6px;border-radius:4px;"></div>'
+                f'    <div style="position:absolute;top:-3px;left:{thr_pct:.1f}%;'
+                f'width:2px;height:12px;background:#333;border-radius:1px;" '
+                f'title="Umbral: {THRESHOLDS[label]:.2f}"></div>'
+                f'  </div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
-            st.progress(prob)
 
         st.caption("ℹ El color no representa gravedad. Solo la longitud de la barra refleja la probabilidad estimada (0–1).")
 

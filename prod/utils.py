@@ -1,4 +1,5 @@
 import io
+import json
 import base64
 from pathlib import Path
 
@@ -9,20 +10,35 @@ from torchvision import transforms
 from PIL import Image
 import streamlit as st
 
-CANONICAL_LABELS = [
-    "No_Finding", "Atelectasis", "Cardiomegaly", "Consolidation",
-    "Edema", "Effusion", "Pneumonia", "Pneumothorax",
-]
+_base = Path(__file__).parent
+_MODEL_DIR = (
+    _base / "model" / "v2.0"
+    if (_base / "model" / "v2.0").exists()
+    else _base.parent / "model" / "v2.0"
+)
+
+with open(_MODEL_DIR / "densenet_focal_moderate_test_metrics.json") as _f:
+    _metrics = json.load(_f)
+
+CANONICAL_LABELS = list(_metrics["per_label"].keys())
+THRESHOLDS: dict[str, float] = {
+    label: info["threshold"] for label, info in _metrics["per_label"].items()
+}
 
 LABEL_ES = {
-    "No_Finding":    "Sin hallazgos",
-    "Atelectasis":   "Atelectasia",
-    "Cardiomegaly":  "Cardiomegalia",
-    "Consolidation": "Consolidación",
-    "Edema":         "Edema pulmonar",
-    "Effusion":      "Derrame pleural",
-    "Pneumonia":     "Neumonía",
-    "Pneumothorax":  "Neumotórax",
+    "No_Finding":                 "Sin hallazgos",
+    "Enlarged_Cardiomediastinum": "Ensanchamiento mediastínico",
+    "Cardiomegaly":               "Cardiomegalia",
+    "Lung_Opacity":               "Opacidad pulmonar",
+    "Lung_Lesion":                "Lesión pulmonar",
+    "Edema":                      "Edema pulmonar",
+    "Consolidation":              "Consolidación",
+    "Pneumonia":                  "Neumonía",
+    "Atelectasis":                "Atelectasia",
+    "Pneumothorax":               "Neumotórax",
+    "Effusion":                   "Derrame pleural",
+    "Pleural_Other":              "Otra patología pleural",
+    "Fracture":                   "Fractura",
 }
 
 LABEL_CSV_ES: dict[str, str] = {
@@ -105,12 +121,7 @@ def get_example_images(folder: str) -> list[tuple[Path, str | None]]:
             result.append((p, label))
     return result
 
-_base = Path(__file__).parent
-MODEL_PATH = (
-    _base / "model" / "e2_dannynet_focal_adamw.pth"
-    if (_base / "model" / "e2_dannynet_focal_adamw.pth").exists()
-    else _base.parent / "model" / "e2_dannynet_focal_adamw.pth"
-)
+MODEL_PATH = _MODEL_DIR / "densenet_focal_moderate.pth"
 
 TRANSFORM = transforms.Compose([
     transforms.Resize(320),
