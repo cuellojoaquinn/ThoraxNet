@@ -12,9 +12,9 @@ import streamlit as st
 
 _base = Path(__file__).parent
 _MODEL_DIR = (
-    _base / "model" / "v2.0"
-    if (_base / "model" / "v2.0").exists()
-    else _base.parent / "model" / "v2.0"
+    _base / "model"
+    if (_base / "model").exists()
+    else _base.parent / "model"
 )
 
 with open(_MODEL_DIR / "densenet_focal_moderate_test_metrics.json") as _f:
@@ -124,7 +124,7 @@ def get_example_images(folder: str) -> list[tuple[Path, str | None]]:
 MODEL_PATH = _MODEL_DIR / "densenet_focal_moderate.pth"
 
 TRANSFORM = transforms.Compose([
-    transforms.Resize(320),
+    transforms.Resize(256),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
